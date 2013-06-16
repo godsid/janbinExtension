@@ -18,7 +18,6 @@
 		"48": "images/icon48.png",
 		"128": "images/icon128.png" 
 	},
-	"key": "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDj7qmTPZyy1H8tpHpHQlaXs1hquYMSJ7MTknUNLPBvvr502YO+w/qEaJq7Yp/ZOZvnqWJW6YON/FzGjN/5VBl1dnagJxBQ5QaYFLkPC3dsTkMoD5mkLWLy//1uL4Q113wHmo44WsUPKMxgk80iSNkAMPXQG+ClykNcPhy5Lv1HLQIDAQAB",
 	"permissions": [
 		"http://*/*",
 		"notifications",
