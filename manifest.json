@@ -1,0 +1,51 @@
+{
+	"manifest_version":2,
+	"name": "Janbin.com",
+	"version": "1.1",
+	"description": "Janbin.com แหล่งรวมร้านอาหาร รีวิวร้านอาหาร แนะนำร้านอาหาร อาหารอร่อย แนะนำร้านอาหารรบรรยากาศดี พร้อมข้อมูลและแผนที่ร้านอาหาร",
+	"background": {
+					"scripts":["js/jquery.tools.min_1.7.2.js","js/background.js"]
+				},
+	//"update_url" : "http://srihawong.info/app/chrome/update.xml",
+	//"options_page": "options.html",
+	"browser_action": {
+		"default_title": "janbin.com",
+		"default_popup": "popup.html",
+		"default_icon": "images/icon16.png"
+	},
+	"icons": {
+		"16": "images/icon16.png",
+		"48": "images/icon48.png",
+		"128": "images/icon128.png" 
+	},
+	"key": "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDj7qmTPZyy1H8tpHpHQlaXs1hquYMSJ7MTknUNLPBvvr502YO+w/qEaJq7Yp/ZOZvnqWJW6YON/FzGjN/5VBl1dnagJxBQ5QaYFLkPC3dsTkMoD5mkLWLy//1uL4Q113wHmo44WsUPKMxgk80iSNkAMPXQG+ClykNcPhy5Lv1HLQIDAQAB",
+	"permissions": [
+		"http://*/*",
+		"notifications",
+		"tabs",
+		"topSites",
+		"tts",
+		"ttsEngine",
+		"webNavigation",
+		"pushMessaging"
+	],
+	"tts_engine": {
+	    "voices": [
+	      {
+		"voice_name": "Alice",
+		"lang": "en-US",
+		"gender": "female",
+		"event_types": ["start", "marker", "end"]
+	      },
+	      {
+		"voice_name": "Pat",
+		"lang": "en-US",
+		"event_types": ["end"]
+	      }
+	    ]
+	  },
+	"web_accessible_resources" : [
+		"*"
+	]
+	
+}
