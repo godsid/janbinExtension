@@ -15,8 +15,7 @@ function onDBError(tx,e){
 
 db.transaction(function (tx) {
 	/* Create Database if exits */
-	tx.executeSql('CREATE TABLE IF NOT EXISTS notification (id integer primary key asc, time integer,link string,msg string,reading bool)',[]);
-	//tx.executeSql('INSERT INTO notification (id, time ,link,msg,reading) VALUES(?,?,?,?,?)',[null,new Date(),"http://banpot.srihawong.info","test msg","false"],null,onDBError);
+	tx.executeSql('CREATE TABLE IF NOT EXISTS notification (id integer primary key asc, time integer, user_img string, user_name string string, review_id string, review_title string, review_desc string,review_ratting integer,review_img string, reading bool)',[]);
 
 	/* Check notification isn't read */
 	tx.executeSql("SELECT COUNT(*) AS row FROM notification WHERE reading='false'", [], function(tx, rs){
@@ -56,8 +55,7 @@ chrome.runtime.onInstalled.addListener(function(){
 	*/
 });
 
-window.webkitNotifications.createHTMLNotification('notification.html').show();
-
+//window.webkitNotifications.createHTMLNotification('notification.html?id=5').show();
 
 /*chrome.topSites.get(function(r){
 });
@@ -73,13 +71,19 @@ chrome.pushMessaging.onMessage.addListener(function(obj){
 	if(payload.icon==undefined){
 		payload.icon = "images/icon128.png";
 	}
+	// review
+	if(payload.t==1){
+		payload.title = payload.un+" ได้เพิ่มรีวิวร้านใหม่";
+		payload.msg = "@"+payload.rt;
+		payload.url = "http://www.janbin.com/รีวิว/"+payload.ri;
+	}
 	if(payload.isHTML){
 		var notificate = window.webkitNotifications.createHTMLNotification('notification.html');
 	}else{
 		var notificate = window.webkitNotifications.createNotification(payload.icon, payload.title, payload.msg);
 	}
 	db.transaction(function (tx) {
-		tx.executeSql("INSERT INTO notification (id, time ,link,msg,reading) VALUES(?,?,?,?,?) ", [null,new Date(),payload.url,payload.msg,'false'], function(tx, rs){
+		tx.executeSql("INSERT INTO notification (id, time ,user_img,user_name,review_id,review_title, review_desc, review_ratting, review_img, reading) VALUES(?,?,?,?,?,?,?,?,?,?) ", [null,new Date(),payload.ui,payload.un,payload.ri,payload.rt,payload.rd,payload.ra,payload.rm,'false'], function(tx, rs){
 			notificate.id = rs.insertId;
 		});
 	});
