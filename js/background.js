@@ -1,3 +1,15 @@
+/* Google Analytics */
+var _gaq = _gaq || [];
+_gaq.push(['_setAccount', 'UA-18384901-14']);
+
+
+(function() {
+  var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+  ga.src = 'https://ssl.google-analytics.com/ga.js';
+  var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+})();
+
+
 // Allow notification
 if (window.webkitNotifications) {
 	if (window.webkitNotifications.checkPermission() == 1) { // 0 is PERMISSION_ALLOWED
@@ -20,11 +32,16 @@ db.transaction(function (tx) {
 	/* Check notification isn't read */
 	tx.executeSql("SELECT COUNT(*) AS row FROM notification WHERE reading='false'", [], function(tx, rs){
 		localStorage.badge = rs.rows.item(0).row;
-		if(rs.rows.length>0){	
-			chrome.browserAction.setBadgeText({
-				text: rs.rows.length.toString()
-			});
+		console.log("Badge: "+localStorage.badge);
+		if(localStorage.badge>0){
+			badge = localStorage.badge;
+		}else{
+			badge  = "";
 		}
+			chrome.browserAction.setBadgeText({
+				text: badge.toString()
+			});
+		
 	},onDBError);
 });
 
@@ -63,8 +80,9 @@ chrome.runtime.onInstalled.addListener(function(){
 
 // Push Process
 chrome.pushMessaging.onMessage.addListener(function(obj){
+	_gaq.push(['_trackPageview','/extension/notification']);
 	var payload = JSON.parse(obj.payload.replace(/\\"/g,'"'));
-	
+	console.log(payload);
 	localStorage.badge++;
 	/*******************/
 	/*Display Notification */
@@ -99,10 +117,11 @@ chrome.pushMessaging.onMessage.addListener(function(obj){
 			tx.executeSql("UPDATE notification SET reading='true' WHERE id='"+notificate.id+"' ", [],null,onDBError);
 		});
 		this.close();
-		localStorage.badge--;
+		localStorage.badge = localStorage.badge-1;
 		chrome.browserAction.setBadgeText({
 			text: localStorage.badge.toString()
 		});
+		_gaq.push(['_trackEvent','notification','clicked']);
 	};
 	
 	/*******************/

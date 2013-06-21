@@ -1,3 +1,15 @@
+
+/* Google Analytics */
+var _gaq = _gaq || [];
+_gaq.push(['_setAccount', 'UA-18384901-14']);
+_gaq.push(['_trackPageview','/extension/popup.html']);
+
+(function() {
+  var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+  ga.src = 'https://ssl.google-analytics.com/ga.js';
+  var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+})();
+
 function onDBError(tx,e){
 	console.log("Database Error: "+e.message);
 }
@@ -6,19 +18,38 @@ var update  = [];
 var db = openDatabase('notificationDB', '1.0', 'notification Database', 2 * 1024 * 1024);//2M
 db.transaction(function (tx) {
 	/* Check notification isn't read */
-	tx.executeSql("SELECT * FROM notification ORDER BY id DESC LIMIT 0,10 ", [], function(tx, rs){
+	tx.executeSql("SELECT * FROM notification WHERE reading='false' ORDER BY id DESC LIMIT 0,10 ", [], function(tx, rs){
 		if(rs.rows.length>0){
 			for(var i =0;i<rs.rows.length;i++){
 				console.log(rs.rows.item(i));
 				update.push(rs.rows.item(i));
 			}
 			//showlist();
-			chrome.tabs.create({url:"http://www.janbin.com/รีวิว/"+update[0].review_id});
+			if(update.length){
+				clickPopup(update[0].review_id);
+				chrome.tabs.create({url:"http://www.janbin.com/รีวิว/"+review_id});
+			}
+		}else{
+			chrome.tabs.create({url:"http://www.janbin.com/"});
 		}
 	},onDBError);
 });
 
-
+function clickPopup(review_id){
+	db.transaction(function (tx) {
+		tx.executeSql("UPDATE notification SET reading = 'true' WHERE review_id = '"+review_id+"' ", [], null);
+		localStorage.badge = localStorage.badge-1;
+		console.log(localStorage.badge);
+		if(localStorage.badge>0){
+			badge = localStorage.badge;
+		}else{
+			badge = "";
+		}
+		chrome.browserAction.setBadgeText({
+			text: badge.toString()
+		});
+	});	
+}
 function showlist(){
 	
 /*
