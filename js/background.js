@@ -16,6 +16,7 @@ if (window.webkitNotifications) {
 		window.webkitNotifications.requestPermission();
   } 
 }
+
 localStorage.badge = 0;
 var notificate;
 var transaction = {id:null};
@@ -58,7 +59,6 @@ chrome.runtime.onInstalled.addListener(function(){
 		});
 	});
 	
-	
 	/*
 	this.db = openDatabase('notification', '1.0', 'janbin notification', 8192);
 	this.db.transaction(function(tx) {
@@ -72,8 +72,6 @@ chrome.runtime.onInstalled.addListener(function(){
 	*/
 });
 
-//window.webkitNotifications.createHTMLNotification('notification.html?id=5').show();
-
 /*chrome.topSites.get(function(r){
 });
 */
@@ -83,6 +81,9 @@ chrome.pushMessaging.onMessage.addListener(function(obj){
 	_gaq.push(['_trackPageview','/extension/notification']);
 	var payload = JSON.parse(obj.payload.replace(/\\"/g,'"'));
 	console.log(payload);
+	if(payload.ri==undefined){
+		return false;
+	}
 	localStorage.badge++;
 	/*******************/
 	/*Display Notification */
@@ -91,13 +92,15 @@ chrome.pushMessaging.onMessage.addListener(function(obj){
 	}
 	// review
 	if(payload.t==1){
-		payload.title = payload.un+" ได้เพิ่มรีวิวร้านใหม่";
-		payload.msg = "@"+payload.rt;
+		payload.title = '@'+payload.rt;
+		payload.msg = payload.m+" โดย "+payload.un;
 		payload.url = "http://www.janbin.com/รีวิว/"+payload.ri;
 	}
+	
 	if(payload.isHTML){
 		var notificate = window.webkitNotifications.createHTMLNotification('notification.html');
 	}else{
+		payload.icon='http://ja.files-media.com/image'+payload.rm;
 		var notificate = window.webkitNotifications.createNotification(payload.icon, payload.title, payload.msg);
 	}
 	db.transaction(function (tx) {
