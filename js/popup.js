@@ -18,7 +18,7 @@ var update  = [];
 var db = openDatabase('notificationDB', '1.0', 'notification Database', 2 * 1024 * 1024);//2M
 
 db.transaction(function (tx) {
-	/* Check notification isn't read */
+	// Check notification isn't read 
 	tx.executeSql("SELECT * FROM notification WHERE reading='false' ORDER BY id DESC LIMIT 0,10 ", [], function(tx, rs){
 		//console.log(rs.rows.length);
 		if(rs.rows.length>0){
@@ -28,18 +28,28 @@ db.transaction(function (tx) {
 			}
 			//showlist();
 			if(update.length){
-				chrome.tabs.create({url:"http://www.janbin.com/รีวิว/"+update[0].review_id});
-				clickPopup(update[0].review_id,null,function(){
+				rander(update);
+				//chrome.tabs.create({url:"http://www.janbin.com/รีวิว/"+update[0].review_id});
+				
+				/*clickPopup(update[0].review_id,null,function(){
 					window.close();
-				});	
+				});*/	
 			}
 		}else{
-			chrome.tabs.create({url:"http://www.janbin.com/"});
-			window.close();
+			//chrome.tabs.create({url:"http://www.janbin.com/"});
+			//window.close();
 		}
 	},onDBError);
 });
+function rander(data){
+	var template = $('.notification').clone();
+	var newnode = $(template).clone();
+	for(data AS ee){
+		$(newnode).find('.thm-user img:first').attr('src',)
+	}
+}
 
+/*
 function clickPopup(review_id,errorCallback,successCallback){
 	db.transaction(function (tx) {
 
@@ -58,6 +68,7 @@ function clickPopup(review_id,errorCallback,successCallback){
 		
 	},errorCallback,successCallback);
 }
+*/
 function showlist(){
 	
 /*
