@@ -1,3 +1,21 @@
+/* Connect Database*/
+localStorage.badge = 0;
+var notificate;
+var transaction = {id:null};
+var username = null;
+var email = null;
+var wwwurl = "http://www.janbin.com/";
+var authurl = "http://www.janbin.com/users/auth";
+var reviewUrl = "http://www.janbin.com/รีวิว/";
+var avatarUrl = 'http://www.janbin.com/farm/avatar_org';
+var checkLoginUrl = 'http://www.janbin.com/ajax/users/is_login';
+var db = openDatabase('notificationDB', '1.0', 'notification Database', 2 * 1024 * 1024);//2M
+
+
+
+
+
+
 /* Google Analytics */
 var _gaq = _gaq || [];
 _gaq.push(['_setAccount', 'UA-18384901-14']);
@@ -14,23 +32,68 @@ _gaq.push(['_setAccount', 'UA-18384901-14']);
 if (window.webkitNotifications) {
 	if (window.webkitNotifications.checkPermission() == 1) { // 0 is PERMISSION_ALLOWED
 		window.webkitNotifications.requestPermission();
-  } 
+  }
 }
 
-localStorage.badge = 0;
-var notificate;
-var transaction = {id:null};
-/* Connect Database*/
-var db = openDatabase('notificationDB', '1.0', 'notification Database', 2 * 1024 * 1024);//2M
 function onDBError(tx,e){
 	console.log("Database Error: "+e.message);
 }
+function query(sql,callback){
+	db.transaction(function (tx) {
+		tx.executeSql(sql,[],function(tx,rs){
+			if(callback!=undefined){
+				callback(rs);
+			}
+		},onDBError);
+	});
+}
+/* Create Database if exits */
+function createDatabase(){
+	query('CREATE TABLE IF NOT EXISTS notification (id integer primary key asc, time integer, user_img string, user_name string string, review_id string, review_title string, review_desc string,review_ratting integer,review_img string, reading bool)');
+}
+/* Check notification isn't read */
+function checkBadge(){
+	query("SELECT COUNT(*) AS row FROM notification WHERE reading='false'",function(respArr){
+		if(respArr.row>0){
+			localStorage.badge = respArr.item(0).row;
+		}else{
+			localStorage.badge = 0;
+		}
+		badge = localStorage.badge>0?localStorage.badge:'';
+			chrome.browserAction.setBadgeText({
+					text: badge.toString()
+			});
+		});
+}
+function checkLogin(){
+	chrome.cookies.get({url :wwwurl,name:'WCC_user'},function(cookie){
+		if(cookie==null){
+			isLogin = false;
+			randerLogin();
+		}else{
+			isLogin = true;
+			$.get(checkLoginUrl,function(resp){
+				console.log(resp);
+			});
+			
+		}
+	});
+}
+/* Register device*/
+function registerDevice(){
 
+}
+
+createDatabase();
+checkBadge();
+checkLogin();
+
+
+/*
 db.transaction(function (tx) {
-	/* Create Database if exits */
-	tx.executeSql('CREATE TABLE IF NOT EXISTS notification (id integer primary key asc, time integer, user_img string, user_name string string, review_id string, review_title string, review_desc string,review_ratting integer,review_img string, reading bool)',[]);
-
-	/* Check notification isn't read */
+	//tx.executeSql('CREATE TABLE IF NOT EXISTS notification (id integer primary key asc, time integer, user_img string, user_name string string, review_id string, review_title string, review_desc string,review_ratting integer,review_img string, reading bool)',[]);
+	
+	// Check notification isn't read 
 	tx.executeSql("SELECT COUNT(*) AS row FROM notification WHERE reading='false'", [], function(tx, rs){
 		localStorage.badge = rs.rows.item(0).row;
 		console.log("Badge: "+localStorage.badge);
@@ -42,10 +105,9 @@ db.transaction(function (tx) {
 			chrome.browserAction.setBadgeText({
 				text: badge.toString()
 			});
-		
 	},onDBError);
 });
-
+*/
 chrome.runtime.onInstalled.addListener(function(){
 	/* Register Device */
 	chrome.pushMessaging.getChannelId(true,function(ch){

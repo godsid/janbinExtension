@@ -1,8 +1,5 @@
-
-var update  = [];
 var db = openDatabase('notificationDB', '1.0', 'notification Database', 2 * 1024 * 1024);//2M
 var isLogin = false;
-var DBtx = null;
 var wwwurl = "http://www.janbin.com/";
 var authurl = "http://www.janbin.com/users/auth";
 var reviewUrl = "http://www.janbin.com/รีวิว/";
@@ -34,10 +31,7 @@ function randerLogin(){
 		});
 	});
 }
-function onDBError(tx,err){
-	console.log(tx);
-	console.log(err.message);
-}
+
 function query(sql,callback){
 	db.transaction(function (tx) {
 		tx.executeSql(sql,[],function(tx,rs){
@@ -90,6 +84,7 @@ function getNotification(){
 	chrome.browserAction.setBadgeText({
 		text: ''
 	});
+	localStorage.badge = 0;
 }
 
 // Check Login
