@@ -1,4 +1,13 @@
 
+var update  = [];
+var db = openDatabase('notificationDB', '1.0', 'notification Database', 2 * 1024 * 1024);//2M
+var isLogin = false;
+var DBtx = null;
+var wwwurl = "http://www.janbin.com/";
+var authurl = "http://www.janbin.com/users/auth";
+var reviewUrl = "http://www.janbin.com/รีวิว/";
+var avatarUrl = 'http://www.janbin.com/farm/avatar_org';
+
 /* Google Analytics */
 var _gaq = _gaq || [];
 _gaq.push(['_setAccount', 'UA-18384901-14']);
@@ -13,94 +22,83 @@ _gaq.push(['_trackPageview','/extension/popup.html']);
 function onDBError(tx,e){
 	console.log("Database Error: "+e.message);
 }
-
-var update  = [];
-var db = openDatabase('notificationDB', '1.0', 'notification Database', 2 * 1024 * 1024);//2M
-
-db.transaction(function (tx) {
-	// Check notification isn't read 
-	tx.executeSql("SELECT * FROM notification WHERE reading='false' ORDER BY id DESC LIMIT 0,10 ", [], function(tx, rs){
-		//console.log(rs.rows.length);
-		if(rs.rows.length>0){
-			for(var i =0;i<rs.rows.length;i++){
-				//console.log(rs.rows.item(i));
-				update.push(rs.rows.item(i));
-			}
-			//showlist();
-			if(update.length){
-				rander(update);
-				//chrome.tabs.create({url:"http://www.janbin.com/รีวิว/"+update[0].review_id});
-				
-				/*clickPopup(update[0].review_id,null,function(){
-					window.close();
-				});*/	
-			}
-		}else{
-			//chrome.tabs.create({url:"http://www.janbin.com/"});
-			//window.close();
-		}
-	},onDBError);
-});
-function rander(data){
-	var template = $('.notification').clone();
-	var newnode = $(template).clone();
-	for(data AS ee){
-		$(newnode).find('.thm-user img:first').attr('src',)
-	}
-}
-
-/*
-function clickPopup(review_id,errorCallback,successCallback){
-	db.transaction(function (tx) {
-
-		tx.executeSql("UPDATE notification SET reading = 'true' WHERE review_id = '"+review_id+"' AND reading = 'false' ", [], function(tx,rs){	
-			localStorage.badge = localStorage.badge-rs.rowsAffected;
-			if(localStorage.badge>0){
-				badge = localStorage.badge;
+function randerLogin(){
+	$('.login').show();
+	$('.login a').click(function(){
+		chrome.tabs.query({url:authurl+'*'},function(respArr){
+			if(respArr.length){
+				chrome.tabs.update(respArr[0].id,{active:true});
 			}else{
-				badge = "";
+				chrome.tabs.create({url:$('.login a').attr('href')});
 			}
-			chrome.browserAction.setBadgeText({
-				text: badge.toString()
-			});
 		});
-
-		
-	},errorCallback,successCallback);
+	});
 }
-*/
-function showlist(){
-	
-/*
-	var list = $('.list').clone();
+function onDBError(tx,err){
+	console.log(tx);
+	console.log(err.message);
+}
+function query(sql,callback){
+	db.transaction(function (tx) {
+		tx.executeSql(sql,[],function(tx,rs){
+			if(callback!=undefined){
+				callback(rs);
+			}
+		},onDBError);
+	});
+}
+function randerNotification(items){
+	var template = $('.notification li:first').clone();
 	$('.notification').html('');
-	//alert(update.length);
-	console.log(update.length);
-	for(var i=0;i<update.length;i++)
-	{
-		var newList = $(list).clone();
-		$(newList).find('.thm-user')[0].href="http://www.janbin.com/profile/"+update[i].user_name;
-		$(newList).find('.thm-user img')[0].src="http://www.janbin.com/farm/avatar_org"+update[i].user_img;
-		$(newList).find('.thm-uname')[0].href="http://www.janbin.com/profile/"+update[i].user_name;
-		$(newList).find('.thm-uname em')[0].innerHTML= '@'+update[i].user_name;
-		$(newList).find('.detail a')[0].href="http://www.janbin.com/รีวิว/"+update[i].review_id;
-		//$(newList).find('.detail a')[0].innerHTML=update[i].rtitle;
-		$(newList).find('.detail span')[0].innerHTML = "";//"ได้เพิ่มรีวิวร้าน @"+update[i].review_title;
-		$(newList).find('.review-img-link')[0].href="http://www.	.com/รีวิว/"+update[i].review_id;
-		$(newList).find('.review-img')[0].src="http://ja.files-media.com/image"+update[i].review_img;
-		$(newList).find('.score').css('width',update[i].review_ratting+'%');
-		$(newList).appendTo('.notification');
+	for(var i=0;i<items.length;i++){
+		var item = items.item(i);
+		var newnode = $(template).clone();
+		$($(newnode).find('.thm-user img:first')[0]).attr('src',avatarUrl+item.user_img);
+		$($(newnode).find('.detail em')[0]).html(item.user_name);
+		$($(newnode).find('.detail a')[1]).html(item.review_title);
+		$($(newnode).find('.detail a')[1]).attr('src',reviewUrl+item.review_id);
+		$(newnode).find('detail span').html(item.review_desc);
+		$(newnode).find('score').css('width',item.review_ratting+'%');
+		if(item.reading=='false'){
+			$(newnode).addClass('reading');
+		}
+		$(newnode).appendTo('.notification');
 	}
-	$('a').click(function(){
-		chrome.tabs.create({
-			url :this.href,
-			active :true
-		})
-	});
-	$('.list').mouseover(function(){
-			$(this).addClass('over');
-	}).mouseout(function(){
-		$(this).removeClass('over');
-	});
-	*/
 }
+function getNotification(){
+	query("SELECT * FROM notification ORDER BY  reading ASC ,time DESC LIMIT 0,10 ",function(resp){
+		if(resp.rows.length>0){
+			$('.notification').hide();
+			randerNotification(resp.rows);
+			$('.notification').show();
+			$('.notification .list').mouseover(function(){
+				$(this).addClass('over');
+			});
+			$('.notification .list').mouseout(function(){
+				$(this).removeClass('over');
+			});
+			$('.notification .list').click(function(){
+				_gaq.push(['_trackEvent','popup_review','clicked']);
+				chrome.tabs.create({url:$($(this).find('.detail a')[1]).attr('href')});
+			});
+		}else{
+			chrome.tabs.create({url:wwwurl});
+			window.close();
+		}
+	});
+	query("UPDATE notification SET reading = 'true'");
+	chrome.browserAction.setBadgeText({
+		text: ''
+	});
+}
+
+// Check Login
+chrome.cookies.get({url :wwwurl,name:'WCC_user'},function(cookie){
+	if(cookie==null){
+		isLogin = false;
+		randerLogin();
+	}else{
+		isLogin = true;
+		getNotification();
+	}
+});

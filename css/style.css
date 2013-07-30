@@ -19,8 +19,9 @@ a:hover{text-decoration:underline;}
 }
 .notification .thm-user{
 }
-list{padding:10px 0 5px 10px;position:relative;border-bottom:solid 2px #e6e6e6;}
-list.over{background-color:#717375;}
+.list{padding:10px 0 5px 10px;position:relative;border-bottom:solid 2px #e6e6e6;cursor:pointer;}
+.list.reading{background-color:#E5D3E5;}
+.list.over{background-color:#717375;}
 .thm-user img {border-radius:3em;float:left;}
 a:hover.thm-user img{opacity: 1;filter: none;box-shadow: 0 0 0 1px #970127,0 0 0 6px #e62379,-3px 3px 3px 8px rgba(0,0,0,0.5);}	
 .thm-uname em {display: block;font: 11px/16px tahoma;list-style-type:none;position: absolute;left: 0px;width: 80px;top: 95px;text-align: center;}
