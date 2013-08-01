@@ -9,12 +9,35 @@ var authurl = "http://www.janbin.com/users/auth";
 var reviewUrl = "http://www.janbin.com/รีวิว/";
 var avatarUrl = 'http://www.janbin.com/farm/avatar_org';
 var checkLoginUrl = 'http://www.janbin.com/ajax/users/is_login';
+var notificationUrl = 'http://srihawong.info/app/gcm/register.php';
+var extensionUrl = "https://chrome.google.com/webstore/detail/janbincom-notification/enmhpobiebfcjldhccpgacdjcfonclhl";
 var db = openDatabase('notificationDB', '1.0', 'notification Database', 2 * 1024 * 1024);//2M
+var isLogin = false;
+var debug = false;
 
+if(localStorage.debug!=undefined&&localStorage.debug==true){
+	debug = true;
+}
 
+chrome.runtime.onInstalled.addListener(function(obj){
+	notification = window.webkitNotifications.createNotification('images/icon128.png', "Welcome Janbin Notification", 'Janbin.com\n แหล่งรวมร้านอาหาร รีวิวอาหารอร่อยจากนักชิมและสมาชิก พร้อมรายละเอียดข้อมูลและแผนที่ของร้านอาหาร');
+	notification.url = wwwurl;
+	notification.onclick = function(e){
+		_gaq.push(['_trackEvent','Extension',obj.reason]);
+		chrome.tabs.create({url:e.target.url});
+	};
+	notification.show();
+});
 
-
-
+chrome.runtime.onUpdateAvailable.addListener(function(obj){
+	notification = window.webkitNotifications.createNotification('images/icon128.png', 'Janbin Notification new version('+obj.version+')', '');
+	notification.url = extensionUrl;
+	notification.onclick = function(e){
+		_gaq.push(['_trackEvent','Extension new version',"clicked"]);
+		chrome.tabs.create({url:e.target.url});
+	};
+	notification.show();
+});
 
 /* Google Analytics */
 var _gaq = _gaq || [];
@@ -36,9 +59,15 @@ if (window.webkitNotifications) {
 }
 
 function onDBError(tx,e){
-	console.log("Database Error: "+e.message);
+	if(debug){
+		console.log("Database Error: "+e.message);
+	}
+
 }
 function query(sql,callback){
+	if(debug){
+		console.log('Query: '+sql);
+	}
 	db.transaction(function (tx) {
 		tx.executeSql(sql,[],function(tx,rs){
 			if(callback!=undefined){
@@ -49,11 +78,17 @@ function query(sql,callback){
 }
 /* Create Database if exits */
 function createDatabase(){
+	if(localStorage.user==undefined){
+		localStorage.user = 'guest';
+	}
+	if(localStorage.email==undefined){
+		localStorage.email = 'guest@janbin.com';
+	}
 	query('CREATE TABLE IF NOT EXISTS notification (id integer primary key asc, time integer, user_img string, user_name string string, review_id string, review_title string, review_desc string,review_ratting integer,review_img string, reading bool)');
 }
 /* Check notification isn't read */
 function checkBadge(){
-	query("SELECT COUNT(*) AS row FROM notification WHERE reading='false'",function(respArr){
+		query("SELECT COUNT(*) AS row FROM notification WHERE reading='false'",function(respArr){
 		if(respArr.row>0){
 			localStorage.badge = respArr.item(0).row;
 		}else{
@@ -65,80 +100,147 @@ function checkBadge(){
 			});
 		});
 }
-function checkLogin(){
+function checkLogin(callback){
 	chrome.cookies.get({url :wwwurl,name:'WCC_user'},function(cookie){
 		if(cookie==null){
 			isLogin = false;
-			randerLogin();
+			if(callback!=undefined){
+				callback();
+			}
 		}else{
 			isLogin = true;
 			$.get(checkLoginUrl,function(resp){
-				console.log(resp);
+				localStorage.user = resp.payload.result.data.username;
+				localStorage.email = resp.payload.result.data.username;
 			});
-			
+		}
+		if(callback!=undefined){
+			callback();
 		}
 	});
 }
 /* Register device*/
-function registerDevice(){
-
-}
-
-createDatabase();
-checkBadge();
-checkLogin();
-
-
-/*
-db.transaction(function (tx) {
-	//tx.executeSql('CREATE TABLE IF NOT EXISTS notification (id integer primary key asc, time integer, user_img string, user_name string string, review_id string, review_title string, review_desc string,review_ratting integer,review_img string, reading bool)',[]);
-	
-	// Check notification isn't read 
-	tx.executeSql("SELECT COUNT(*) AS row FROM notification WHERE reading='false'", [], function(tx, rs){
-		localStorage.badge = rs.rows.item(0).row;
-		console.log("Badge: "+localStorage.badge);
-		if(localStorage.badge>0){
-			badge = localStorage.badge;
-		}else{
-			badge  = "";
-		}
-			chrome.browserAction.setBadgeText({
-				text: badge.toString()
-			});
-	},onDBError);
-});
-*/
-chrome.runtime.onInstalled.addListener(function(){
-	/* Register Device */
+var registerDevice = function(){
+	if(debug){
+		console.log("register device");
+	}
 	chrome.pushMessaging.getChannelId(true,function(ch){
-		console.log(ch);
-		$.post('http://srihawong.info/app/gcm/register.php',{
-			"name":"guest",
-			"email":"guest@janbin.com",
+		if(debug){
+			console.log(localStorage.user);
+		}
+		name = isLogin?localStorage.user:'guest';
+		email = isLogin?localStorage.email:'guest@janbin.com';
+		$.post(notificationUrl,{
+			"name":name,
+			"email":email,
 			"regId":ch.channelId,
 			"appname":"janbin",
 			"apptype":"chrome"
 		});
 	});
-	
-	/*
-	this.db = openDatabase('notification', '1.0', 'janbin notification', 8192);
-	this.db.transaction(function(tx) {
-	  tx.executeSql("create table if not exists " +
-		"notification(id integer primary key asc, time integer, user_id string," +
-				  "user_name string, user_image string,review_title string,review_link string, review_desc string,review_img string,review_ratting float",
-		[],
-		function() { console.log("siucc"); }
-	  );
-	});
-	*/
-});
+}
+// Push Process
+function pushListener(){
+	if(debug){
+		console.log("pushMessaging Listener");
+	}
+	chrome.pushMessaging.onMessage.addListener(pushReceive);
+}
+//Received push data
+function pushReceive(data){
+	_gaq.push(['_trackPageview','notification/comment']);
+	switch(data.subchannelId){
+		case 1:
+			notificationNewReview(data.payload);
+			break;
+		case 2:
+			notificationComment(data.payload);
+			break;
+		case 3:
+			notificationAddPoint(data.payload);
+			break;
+		case 4:
+			notificationAddImage(data.payload);
+			break;
+		case 0:
+		default:
+			notificationMessage(data.payload);
+			break;
+	}
+}
+// Display Notification message
+function notificationMessage(data){
+	data = data.split('|');
+	notification = window.webkitNotifications.createNotification('images/icon128.png', data[0], data[1]);
+	notification.url = data[2];
+	notification.onclick = function(e){
+		_gaq.push(['_trackEvent','Message '+data[0],'clicked']);
+		chrome.tabs.create({url:e.target.url});
+	};
+	notification.show();
+}
+//Display Notification new review
+function notificationNewReview(data){
+}
+// Display Notification Comment
+function notificationComment(data){ 
+	data = data.split('|');
+	console.log(data);
+	title = data[1]+" คอมเม้นต์รีวิวของคุณ";
+	message = data[2]+"\n "+justTime(data[3]);
+	notification = window.webkitNotifications.createNotification(avatarUrl+data[0], title, message);
+	notification.url = wwwurl+'รีวิว/'+data[4]+'#place-rw';
+	notification.onclick = function(e){
+		_gaq.push(['_trackEvent','comment','clicked']);
+		chrome.tabs.create({url:e.target.url});
+	};
+	notification.show();
+}
+function notificationAddPoint(data){
+}
+function notificationAddImage(data){
+	/*chrome.notifications.create(new Date().getTime().toString(), {
+		type: "image",
+		title: data.title,
+		message: data.message,
+		iconUrl:data.iconUrl,
+		imageUrl:data.imageUrl,
+		},
+		function(){
+		}
+	);*/
+}
 
-/*chrome.topSites.get(function(r){
+function justTime(t){
+	var diffTime = new Date().getTime()-t;
+
+	if(diffTime<60000){
+		return Math.ceil(diffTime/60000)+" วินาทีที่แล้ว";
+	}else if(diffTime<3600000){
+		return Math.ceil(diffTime/3600000)+" นาทีที่แล้ว";
+	}else if(diffTime<86400000){
+		return Math.ceil(diffTime/86400000)+" ชั่วโมงที่แล้ว";
+	}else if(diffTime<172800000){
+		return "เมื่อวานนี้";
+	}else{
+		return thaiDate(t)
+	}
+}
+function thaiDate(t){
+	return new Date(t).toString().replace(/GMT.*/,'');
+}
+
+createDatabase();
+checkBadge();
+checkLogin(registerDevice);
+pushListener();
+/*
+chrome.topSites.get(function(r){
 });
 */
 
 // Push Process
+/*
 chrome.pushMessaging.onMessage.addListener(function(obj){
 	_gaq.push(['_trackPageview','/extension/notification']);
 	var payload = JSON.parse(obj.payload.replace(/\\"/g,'"'));
@@ -147,8 +249,8 @@ chrome.pushMessaging.onMessage.addListener(function(obj){
 		return false;
 	}
 	localStorage.badge++;
-	/*******************/
-	/*Display Notification */
+	/******************
+	/*Display Notification 
 	if(payload.icon==undefined){
 		payload.icon = "images/icon128.png";
 	}
@@ -189,17 +291,17 @@ chrome.pushMessaging.onMessage.addListener(function(obj){
 		_gaq.push(['_trackEvent','notification','clicked']);
 	};
 	
-	/*******************/
-	/*Display Badge */
+	/******************
+	/*Display Badge 
 	chrome.browserAction.setBadgeText({
 		text: localStorage.badge.toString()
 	});
-	/*******************/
-	/* Play Sound*/
+	/******************
+	/* Play Sound
 	if(payload.sound!=undefined){
 		chrome.tts.speak(payload.sound);
 	}
 	/*******************/
-	/*Create Log*/
+	/*Create Log
 	console.log(payload);
-});
+});*/
