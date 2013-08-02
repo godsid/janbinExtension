@@ -4,6 +4,11 @@ var wwwurl = "http://www.janbin.com/";
 var authurl = "http://www.janbin.com/users/auth";
 var reviewUrl = "http://www.janbin.com/รีวิว/";
 var avatarUrl = 'http://www.janbin.com/farm/avatar_org';
+var debug = false;
+
+if(localStorage.debug!=undefined&&localStorage.debug=='true'){
+	debug = true;
+}
 
 /* Google Analytics */
 var _gaq = _gaq || [];
@@ -21,17 +26,20 @@ function onDBError(tx,e){
 }
 function randerLogin(){
 	$('.login').show();
+	$('.login .btn-submit').click(function(){
+		chrome.tabs.create({url:'http://www.janbin.com/users/auth/login'});
+	});
 	$('.login a').click(function(){
-		chrome.tabs.query({url:authurl+'*'},function(respArr){
+		var thislink = $(this).attr('href');
+		chrome.tabs.query({url:authurl+'*'},function(respArr){	
 			if(respArr.length){
-				chrome.tabs.update(respArr[0].id,{active:true});
+				chrome.tabs.update(respArr[0].id,{active:true,url:thislink});
 			}else{
-				chrome.tabs.create({url:$('.login a').attr('href')});
+				chrome.tabs.create({url:thislink});
 			}
 		});
 	});
 }
-
 function query(sql,callback){
 	db.transaction(function (tx) {
 		tx.executeSql(sql,[],function(tx,rs){
@@ -42,11 +50,31 @@ function query(sql,callback){
 	});
 }
 function randerNotification(items){
+	if(debug){
+		console.log('rander Notification');
+	}
 	var template = $('.notification li:first').clone();
 	$('.notification').html('');
 	for(var i=0;i<items.length;i++){
 		var item = items.item(i);
 		var newnode = $(template).clone();
+		item.who = JSON.parse(item.who);
+		item.at = JSON.parse(item.at);
+		$($(newnode).find('a')[0]).attr('href',reviewUrl+item.url);
+		$($(newnode).find('.thm-user')[0]).attr('src',avatarUrl+item.who.avatar);
+		$($(newnode).find('.u-name')[0]).html(item.who.username);
+		$($(newnode).find('.txt-red')[0]).html('ได้คอมเม้นต์รีวิวร้าน');
+		
+		$($(newnode).find('strong')[0]).html(item.at.place);
+		$($(newnode).find('small')[0]).html(item.at.title);
+
+		$($(newnode).find('.thb-action img')[0]).html(item.at.image);
+
+		
+		
+		
+		/*
+
 		$($(newnode).find('.thm-user img:first')[0]).attr('src',avatarUrl+item.user_img);
 		$($(newnode).find('.detail em')[0]).html(item.user_name);
 		$($(newnode).find('.detail a')[1]).html(item.review_title);
@@ -57,10 +85,11 @@ function randerNotification(items){
 			$(newnode).addClass('reading');
 		}
 		$(newnode).appendTo('.notification');
+		*/
 	}
 }
 function getNotification(){
-	query("SELECT * FROM notification ORDER BY  reading ASC ,time DESC LIMIT 0,10 ",function(resp){
+	query("SELECT * FROM notification WHERE action = 'comment' ORDER BY  reading ASC ,time DESC LIMIT 0,10 ",function(resp){
 		if(resp.rows.length>0){
 			$('.notification').hide();
 			randerNotification(resp.rows);
@@ -76,8 +105,8 @@ function getNotification(){
 				chrome.tabs.create({url:$($(this).find('.detail a')[1]).attr('href')});
 			});
 		}else{
-			chrome.tabs.create({url:wwwurl});
-			window.close();
+			//chrome.tabs.create({url:wwwurl});
+			//window.close();
 		}
 	});
 	query("UPDATE notification SET reading = 'true'");
@@ -97,3 +126,5 @@ chrome.cookies.get({url :wwwurl,name:'WCC_user'},function(cookie){
 		getNotification();
 	}
 });
+
+

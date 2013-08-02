@@ -9,18 +9,18 @@ var authurl = "http://www.janbin.com/users/auth";
 var reviewUrl = "http://www.janbin.com/รีวิว/";
 var avatarUrl = 'http://www.janbin.com/farm/avatar_org';
 var checkLoginUrl = 'http://www.janbin.com/ajax/users/is_login';
-var notificationUrl = 'http://srihawong.info/app/gcm/register.php';
+var notificationUrl = 'https://secure.soi19.com/notification/register.php';
 var extensionUrl = "https://chrome.google.com/webstore/detail/janbincom-notification/enmhpobiebfcjldhccpgacdjcfonclhl";
 var db = openDatabase('notificationDB', '1.0', 'notification Database', 2 * 1024 * 1024);//2M
 var isLogin = false;
 var debug = false;
 
-if(localStorage.debug!=undefined&&localStorage.debug==true){
+if(localStorage.debug!=undefined&&localStorage.debug=='true'){
 	debug = true;
 }
 
 chrome.runtime.onInstalled.addListener(function(obj){
-	notification = window.webkitNotifications.createNotification('images/icon128.png', "Welcome Janbin Notification", 'Janbin.com\n แหล่งรวมร้านอาหาร รีวิวอาหารอร่อยจากนักชิมและสมาชิก พร้อมรายละเอียดข้อมูลและแผนที่ของร้านอาหาร');
+	notification = window.webkitNotifications.createNotification('images/icon128.png', "Welcome Janbin Notification", '');
 	notification.url = wwwurl;
 	notification.onclick = function(e){
 		_gaq.push(['_trackEvent','Extension',obj.reason]);
@@ -84,11 +84,21 @@ function createDatabase(){
 	if(localStorage.email==undefined){
 		localStorage.email = 'guest@janbin.com';
 	}
-	query('CREATE TABLE IF NOT EXISTS notification (id integer primary key asc, time integer, user_img string, user_name string string, review_id string, review_title string, review_desc string,review_ratting integer,review_img string, reading bool)');
+	query('CREATE TABLE IF NOT EXISTS notification (id integer primary key asc ,who string,action string,with string,at string, time integer, url string ,reading bool)');
+	//query('CREATE TABLE IF NOT EXISTS notification (id integer primary key asc, time integer, user_img string, user_name string string, review_id string, review_title string, review_desc string,review_ratting integer,review_img string, reading bool)');
+
+	//(comment) INSERT INTO notification VALUES (null,'{username:"Cinnabon",avatar:"/1/1/avt_19_53505.jpg"}','comment','{place:"@Caffe Sonata",title:"คาเฟ่บรรยากาศเก๋ๆ ทานขนมหวานกับเพลงหวานๆ",image:"/1/16/img_22922_OY1lg.jpg"}','{username:"บรรพต สีหะวงษ์",avatar:"/default.jpg?8"}',1375435680,'/3067-Caffe-Sonata','false');
+	//addreview INSERT INTO notification VALUES (null,'{username:"Cinnabon",avatar:"/1/1/avt_19_53505.jpg"}','addreview','{place:"@Caffe Sonata",title:"คาเฟ่บรรยากาศเก๋ๆ ทานขนมหวานกับเพลงหวานๆ",image:"/1/16/img_22922_OY1lg.jpg"}','',1375435680,'/3067-Caffe-Sonata','false');
+	//like INSERT INTO notification VALUES (null,'{username:"Cinnabon",avatar:"/1/1/avt_19_53505.jpg"}','like','{place:"@Caffe Sonata",title:"คาเฟ่บรรยากาศเก๋ๆ ทานขนมหวานกับเพลงหวานๆ",image:"/1/16/img_22922_OY1lg.jpg"}','{username:"บรรพต สีหะวงษ์",avatar:"/default.jpg?8"}',1375435680,'/3067-Caffe-Sonata','false');
+	//vote 
+	//addimage
 }
 /* Check notification isn't read */
 function checkBadge(){
 		query("SELECT COUNT(*) AS row FROM notification WHERE reading='false'",function(respArr){
+		if(debug){
+			console.log('Badge:'+respArr.row);
+		}
 		if(respArr.row>0){
 			localStorage.badge = respArr.item(0).row;
 		}else{
@@ -131,11 +141,13 @@ var registerDevice = function(){
 		name = isLogin?localStorage.user:'guest';
 		email = isLogin?localStorage.email:'guest@janbin.com';
 		$.post(notificationUrl,{
-			"name":name,
-			"email":email,
-			"regId":ch.channelId,
+			"udid":ch.channelId,
+			"deviceToken":"not token",
+			"appid":2,
+			"username":name,
+			"type":"chrome",
 			"appname":"janbin",
-			"apptype":"chrome"
+			"email":email
 		});
 	});
 }
@@ -148,7 +160,7 @@ function pushListener(){
 }
 //Received push data
 function pushReceive(data){
-	_gaq.push(['_trackPageview','notification/comment']);
+	_gaq.push(['_trackPageview','/extension/notification/comment']);
 	switch(data.subchannelId){
 		case 1:
 			notificationNewReview(data.payload);

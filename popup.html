@@ -7,26 +7,68 @@
 <body>
 <div class="warpper" >
 	<div class="header">
-		<a href="http://www.janbin.com/"><img src="images/logo.png" width="300px" height="78px" style="margin:0 auto;" /></a>
+		<a href="http://www.janbin.com/"><img src="images/logo.png" height="50px" /></a>
 	</div>
 	<div class="content">
 		<div class="login" style="display:none;">
-			<a href="http://www.janbin.com/users/auth" >Login</a>
+			<div class="social-connect">
+				<a href="http://www.janbin.com/users/auth/connectFacebook" title="เข้าสู่ระบบด้วย Facebook" id="fb-signin" class="fb-signin">Login with facebook</a>
+				<a href="http://www.janbin.com/users/auth/connectGoogle" title="เข้าสู่ระบบด้วย Google+" id="goo-signin" class="goo-signin">Login with google+</a>
+			</div>
+			<form method="post" action="http://www.janbin.com/users/auth/login" id="loginform">
+			<ul>                             
+				<li>
+					<label class="inBk txt-r" for="email">E-mail :</label>
+					<input type="text" class="txt-box" name="email" id="email" title="email@janbin.com" value="">
+				</li>
+				<li>
+				   <label for="Password" class="inBk txt-r">Password :</label><input type="password" value="" title="password" name="Password" id="Password" class="txt-box">
+				</li>
+				<li class="ctrl-submit"><a title="ลืมรหัสผ่าน" href="http://www.janbin.com/users/auth/forgetpassword" class="btn-forget-pw">ลืมรหัสผ่าน</a> <input type="submit" value="เข้าสู่ระบบ" id="editProfile2" class="btn-submit"></li>
+			</ul>
+			</form>
 		</div>
-		<ul class="notification" style="display:none;">
+		<ul class="notification" style="display:block;">
 			<li class="list">
-				<a href="javascript:;" class="thm-user">
-					<img src="http://www.janbin.com/farm/avatar_org/1/1/avt_27_5718.jpg" width="60" height="60"   />
-				</a>
-				<p class="detail">
-					<a href="javascript:;"><em>บาบิบูเบะ</em></a>ได้เพิ่มรีวิวร้าน
-					<a href="http://www.janbin.com/%E0%B8%A3%E0%B8%B5%E0%B8%A7%E0%B8%B4%E0%B8%A7/2767-Kacha-Kacha">@Kacha Kacha</a>
-					<span>"ร้านอาหารญี่ปุ่นสไตล์เทปันยากิและยากิโทริ"</span>
-				</p>
-				<div class="place-rate">
-					<div class="rating-star"><div class="score" style="width:80%"></div></div>
-				</div>
-			</li>
+                <a href="http://www.janbin.com/%E0%B8%A3%E0%B8%B5%E0%B8%A7%E0%B8%B4%E0%B8%A7/2767-Kacha-Kacha">
+                <img class="thm-user" src="http://www.janbin.com/farm/avatar_org/1/1/avt_27_5718.jpg" width="60" height="60">
+                <div class="ContentInfo">
+                        <p class="Action">
+                            <em class="u-name">บาบิบูเบะ</em>
+                            <span class="txt-red">ได้คอมเม้นต์รีวิวร้าน</span> 
+                            <strong>@Kacha Kacha</strong>
+                            <small>"ร้านอาหารญี่ปุ่นสไตล์เทปันยากิและยากิโทริ"</small>
+                        </p>
+                        <figure class="thb-action">
+                                <img alt="@Kacha Kacha" src="http://ja.files-media.com/image/1/16/img_22782_tmp_LhAXk_162x162.jpg">
+                                <figcaption>@Kacha Kacha</figcaption>
+                        </figure>
+                        <div class="time-device">
+                            <abbr title="2 สิงหาคม 2013 เวลา 10:31 น." data-utime="1375414311" class="timestamp livetimestamp">ประมาณ 1 ชั่วโมงที่แล้ว</abbr>
+                        </div>
+                </div>
+                </a>
+            </li>
+            <li class="list">
+                <a href="http://www.janbin.com/%E0%B8%A3%E0%B8%B5%E0%B8%A7%E0%B8%B4%E0%B8%A7/2767-Kacha-Kacha">
+                <img class="thm-user" src="http://www.janbin.com/farm/avatar_org/1/1/avt_27_5718.jpg" width="60" height="60">
+                <div class="ContentInfo">
+                        <p class="Action">
+                            <em class="u-name">บาบิบูเบะ</em>
+                            <span class="txt-red">ได้เพิ่มรีวิวร้าน</span> 
+                            <strong>@Kacha Kacha</strong>
+                            <small>"ร้านอาหารญี่ปุ่นสไตล์เทปันยากิและยากิโทริ"</small>
+                        </p>
+                        <figure class="thb-action">
+                                <img alt="@Kacha Kacha" src="http://ja.files-media.com/image/1/16/img_22782_tmp_LhAXk_162x162.jpg">
+                                <figcaption>@Kacha Kacha</figcaption>
+                        </figure>
+                        <div class="time-device">
+                            <abbr title="2 สิงหาคม 2013 เวลา 10:31 น." data-utime="1375414311" class="timestamp livetimestamp">ประมาณ 1 ชั่วโมงที่แล้ว</abbr>
+                        </div>
+                </div>
+                </a>
+            </li>
 		</ul>
 	</div>
 </div>

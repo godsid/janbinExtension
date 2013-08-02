@@ -6,8 +6,6 @@
 	"background": {
 					"scripts":["js/jquery.tools.min_1.7.2.js","js/background.js"]
 				},
-	//"update_url" : "http://srihawong.info/app/chrome/update.xml",
-	//"options_page": "options.html",
 	"browser_action": {
 		"default_title": "janbin.com",
 		"default_popup": "popup.html",
@@ -20,6 +18,7 @@
 	},
 	"permissions": [
 		"http://*/*",
+		"https://secure.soi19.com/*",
 		"notifications",
 		"tabs",
 		"topSites",
@@ -48,5 +47,5 @@
 		"*"
 	],
 	"content_security_policy":"script-src 'self' https://ssl.google-analytics.com; object-src 'self'"
-	//,"key": "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDj7qmTPZyy1H8tpHpHQlaXs1hquYMSJ7MTknUNLPBvvr502YO+w/qEaJq7Yp/ZOZvnqWJW6YON/FzGjN/5VBl1dnagJxBQ5QaYFLkPC3dsTkMoD5mkLWLy//1uL4Q113wHmo44WsUPKMxgk80iSNkAMPXQG+ClykNcPhy5Lv1HLQIDAQAB"
+	,"key": "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDj7qmTPZyy1H8tpHpHQlaXs1hquYMSJ7MTknUNLPBvvr502YO+w/qEaJq7Yp/ZOZvnqWJW6YON/FzGjN/5VBl1dnagJxBQ5QaYFLkPC3dsTkMoD5mkLWLy//1uL4Q113wHmo44WsUPKMxgk80iSNkAMPXQG+ClykNcPhy5Lv1HLQIDAQAB"
 }

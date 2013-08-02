@@ -1,34 +1,52 @@
-*{padding:0;margin:0;}
-body{font:14px/18px "Tahoma","DBAdmanXReg";}
-img{border:none;}
-a{text-decoration:none;}
-a:hover{text-decoration:underline;}
-.warpper{
-	width:380px;
-	font-family: "Tahoma";
-	background: #eaeaea;
-	color: #333;
-}
-.header{
-	width:300px;
-	margin:auto;
-	border-bottom:solid 1px #e6e6e6;
-	padding-bottom:5px;
-}
-.content{
-}
-.notification .thm-user{
-}
-.list{padding:10px 0 5px 10px;position:relative;border-bottom:solid 2px #e6e6e6;cursor:pointer;}
-.list.reading{background-color:#E5D3E5;}
-.list.over{background-color:#717375;}
-.thm-user img {border-radius:3em;float:left;}
-a:hover.thm-user img{opacity: 1;filter: none;box-shadow: 0 0 0 1px #970127,0 0 0 6px #e62379,-3px 3px 3px 8px rgba(0,0,0,0.5);}	
-.thm-uname em {display: block;font: 11px/16px tahoma;list-style-type:none;position: absolute;left: 0px;width: 80px;top: 95px;text-align: center;}
-.detail{width:205px;float:left;padding-left: 10px;}
-.detail a{color:#ec1e79;}
-.review-img{width:80px;height:80px;border:solid 4px white;border-radius:10px;float:left;}
-a:hover .review-img{opacity: 1;filter: none;box-shadow: 0 0 0 1px #970127,0 0 0 6px #e62379,-3px 3px 3px 8px rgba(0,0,0,0.5);}
-.place-rate {position: relative;width:100px;clear: both;height: 20px;padding: 5px 0 2px 30px;background: url(../images/icn-set-place.png) 0 -3px no-repeat;left:60px;}
-.rating-star {position: relative;float: left;margin: 0 10px 0 0;width: 100px;height: 20px;background: url(../images/rating-star.png) 0 0 no-repeat;}
-.score {position: absolute;top: 0;left: 0;height: 20px;background: url(../images/rating-star.png) 0 -20px no-repeat;text-indent: -9999px;}
+*{padding:0;margin:0}
+body{font:14px/18px tahoma, "DBAdmanXReg"}
+img{border:none}
+a{text-decoration:none}
+a:hover{text-decoration:underline}
+.warpper{width:380px;font-family: tahoma;background: #eaeaea;color: #333}
+.header{width:300px;margin:auto;border-bottom:solid 1px #e6e6e6;padding-bottom:5px}
+.header img{ display:block;margin:0 auto}
+.notification .thm-user{}
+.social-connect{margin: -10px -10px 10px;padding: 10px;position: relative;text-align: center}
+.social-connect .fb-signin{background: url(../images/ic-regis.png) 0 0 no-repeat}
+.social-connect .fb-signin, .social-connect .goo-signin{display: inline-block;height: 63px;margin: 0 auto;text-indent: -9999px;width: 303px}
+.social-connect .goo-signin{background: url(../images/ic-regis.png) no-repeat scroll 0 -160px transparent}
+.social-connect .fb-signin, .social-connect .goo-signin{display: inline-block;height: 63px;margin: 0 auto;text-indent: -9999px;width: 303px}
+.login ul{ padding-bottom:10px}
+.login ul li{ position:relative;clear:both;text-align:center;margin-bottom:5px}
+.login ul li.mt2{margin-top: 20px}
+.login label{display:block;position:absolute;top:0;left:10px;width:135px;color: #555;font: 700 14px/40px tahoma, "Thonburi";text-align: right}
+.login .txt-box{width: 180px;color: #555;background:#FAFAFA;border: 0 none;box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4) inset;border-radius:.3em;color: #555;font: 14px/20px tahoma, "Thonburi";padding:10px 10px 10px 110px}
+.login ul li.ctrl-submit{padding:10px 0 0}
+.ctrl-submit .btn-submit{display:inline-block;margin:0 auto;min-width:140px;padding:10px 20px;font:700 16px/20px tahoma,"Thonburi";color:#FFF;text-align:center;text-decoration:none;background:#F36;border:0;cursor:pointer;border-radius:.2em;box-shadow:0 1px 2px rgba(0,0,0,0.4)}
+.ctrl-submit a{display:inline-block;margin:0 20px;font:700 14px/30px tahoma,"Thonburi";color:#555}
+.ctrl-submit a.btn-submit{min-width:100px}
+.notification{}
+.notification .list{list-style-type:none;padding:5px 75px 5px 10px;position:relative;border-bottom:solid 2px #e6e6e6;min-height:65px;cursor:pointer}
+.notification .list:after{ content:".";display:block;clear:both;height:0;visibility:hidden}
+.notification .list  a{ color:#555;font:13px/18px tahoma}
+.notification .list  a:hover{ text-decoration:none}
+.notification .list.reading{background-color:#E5D3E5}
+.notification .list.over,.notification .list:hover{background-color:#CCC}
+.thm-user{ display:block;margin:0 10px 0 0;border-radius:3em;float:left}
+a:hover .thm-user{ opacity: 1;filter: none;box-shadow: 0 0 0 1px #970127, 0 0 0 6px #e62379, -3px 3px 3px 8px rgba(0,0,0,0.5)}
+.thm-uname em{display: block;font: 11px/16px tahoma;list-style-type:none;position: absolute;left: 0px;width: 80px;top: 95px;text-align: center}
+.ContentInfo{ display:block;float:left;width:221px;overflow:hidden}
+.ContentInfo .Action{}
+.ContentInfo .Action .u-name{ font-weight:700;font-style:normal;color:#F36}
+.ContentInfo .Action .txt-red{color:#c00}
+.ContentInfo .Action small{}
+.ContentInfo .thb-action{ position:absolute;top:5px;right:5px}
+.ContentInfo .thb-action img{width:60px;height:60px;padding:2px;border:1px solid #666}
+.ContentInfo .thb-action figcaption{opacity:0;height:0;visibility:hidden;transition:.2s ease-in-out all;position:absolute;bottom:75px;right:0;padding:2px 5px;font:12px/16pxtahoma;color:#FFF;text-shadow:0 1px 0 rgba(0,0,0,0.5);background:rgba(0,0,0,0.75);margin-left:-200px;border-radius:.3em .3em 0 .3em}
+a:hover  .ContentInfo .thb-action figcaption{ opacity:1;height:auto;visibility:visible}
+.ContentInfo .thb-action figcaption:after{ content:"";position:absolute;bottom:-5px;right:0;z-index:1;display:block;border-top:5px solid rgba(0,0,0,0.75);border-left:5px solid transparent}
+.ContentInfo .time-device{ position:relative}
+.ContentInfo .time-device abbr{ font:11px/14px tahoma;color:#999}
+
+
+.review-img{width:80px;height:80px;border:solid 4px white;border-radius:10px;float:left}
+a:hover .review-img{opacity: 1;filter: none;box-shadow: 0 0 0 1px #970127, 0 0 0 6px #e62379, -3px 3px 3px 8px rgba(0,0,0,0.5)}
+.place-rate{position: relative;width:100px;clear: both;height: 20px;padding: 5px 0 2px 30px;background: url(../images/icn-set-place.png) 0 -3px no-repeat;left:60px}
+.rating-star{position: relative;float: left;margin: 0 10px 0 0;width: 100px;height: 20px;background: url(../images/rating-star.png) 0 0 no-repeat}
+.score{position: absolute;top: 0;left: 0;height: 20px;background: url(../images/rating-star.png) 0 -20px no-repeat;text-indent: -9999px}
