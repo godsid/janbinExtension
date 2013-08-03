@@ -8,16 +8,12 @@ var wwwurl = "http://www.janbin.com/";
 var authurl = "http://www.janbin.com/users/auth";
 var reviewUrl = "http://www.janbin.com/รีวิว/";
 var avatarUrl = 'http://www.janbin.com/farm/avatar_org';
+
 var checkLoginUrl = 'http://www.janbin.com/ajax/users/is_login';
 var notificationUrl = 'https://secure.soi19.com/notification/register.php';
 var extensionUrl = "https://chrome.google.com/webstore/detail/janbincom-notification/enmhpobiebfcjldhccpgacdjcfonclhl";
 var db = openDatabase('notificationDB', '1.0', 'notification Database', 2 * 1024 * 1024);//2M
 var isLogin = false;
-var debug = false;
-
-if(localStorage.debug!=undefined&&localStorage.debug=='true'){
-	debug = true;
-}
 
 chrome.runtime.onInstalled.addListener(function(obj){
 	notification = window.webkitNotifications.createNotification('images/icon128.png', "Welcome Janbin Notification", '');
@@ -52,24 +48,20 @@ _gaq.push(['_setAccount', 'UA-18384901-14']);
 
 
 // Allow notification
-if (window.webkitNotifications) {
+if (window.webkitNotifications){
 	if (window.webkitNotifications.checkPermission() == 1) { // 0 is PERMISSION_ALLOWED
 		window.webkitNotifications.requestPermission();
   }
 }
 
 function onDBError(tx,e){
-	if(debug){
-		console.log("Database Error: "+e.message);
-	}
-
+	Debug("Database Error: "+e.message);
 }
 function query(sql,callback){
-	if(debug){
-		console.log('Query: '+sql);
-	}
+	Debug('Query: '+sql);
 	db.transaction(function (tx) {
 		tx.executeSql(sql,[],function(tx,rs){
+			Debug(rs.row);
 			if(callback!=undefined){
 				callback(rs);
 			}
@@ -78,6 +70,7 @@ function query(sql,callback){
 }
 /* Create Database if exits */
 function createDatabase(){
+	Debug('Create Database Table notification');
 	if(localStorage.user==undefined){
 		localStorage.user = 'guest';
 	}
@@ -86,8 +79,10 @@ function createDatabase(){
 	}
 	query('CREATE TABLE IF NOT EXISTS notification (id integer primary key asc ,who string,action string,with string,at string, time integer, url string ,reading bool)');
 	//query('CREATE TABLE IF NOT EXISTS notification (id integer primary key asc, time integer, user_img string, user_name string string, review_id string, review_title string, review_desc string,review_ratting integer,review_img string, reading bool)');
+	query("INSERT INTO notification VALUES(1,'','welcome','','',"+Math.ceil(new Date().getTime()/1000)+",'"+wwwurl+"','false')");
+	
 
-	//(comment) INSERT INTO notification VALUES (null,'{username:"Cinnabon",avatar:"/1/1/avt_19_53505.jpg"}','comment','{place:"@Caffe Sonata",title:"คาเฟ่บรรยากาศเก๋ๆ ทานขนมหวานกับเพลงหวานๆ",image:"/1/16/img_22922_OY1lg.jpg"}','{username:"บรรพต สีหะวงษ์",avatar:"/default.jpg?8"}',1375435680,'/3067-Caffe-Sonata','false');
+	//(comment) INSERT INTO notification VALUES (null,'{"username":"Cinnabon","avatar":"/1/1/avt_19_53505.jpg"}','comment','{"username":"บรรพต สีหะวงษ์","avatar":"/default.jpg?8"}','{"place":"@Caffe Sonata","title":"คาเฟ่บรรยากาศเก๋ๆ ทานขนมหวานกับเพลงหวานๆ","image":"/1/16/img_22922_OY1lg.jpg"}',1375435680,'/3067-Caffe-Sonata','false');	
 	//addreview INSERT INTO notification VALUES (null,'{username:"Cinnabon",avatar:"/1/1/avt_19_53505.jpg"}','addreview','{place:"@Caffe Sonata",title:"คาเฟ่บรรยากาศเก๋ๆ ทานขนมหวานกับเพลงหวานๆ",image:"/1/16/img_22922_OY1lg.jpg"}','',1375435680,'/3067-Caffe-Sonata','false');
 	//like INSERT INTO notification VALUES (null,'{username:"Cinnabon",avatar:"/1/1/avt_19_53505.jpg"}','like','{place:"@Caffe Sonata",title:"คาเฟ่บรรยากาศเก๋ๆ ทานขนมหวานกับเพลงหวานๆ",image:"/1/16/img_22922_OY1lg.jpg"}','{username:"บรรพต สีหะวงษ์",avatar:"/default.jpg?8"}',1375435680,'/3067-Caffe-Sonata','false');
 	//vote 
@@ -95,10 +90,9 @@ function createDatabase(){
 }
 /* Check notification isn't read */
 function checkBadge(){
+		Debug("checkBadge");
 		query("SELECT COUNT(*) AS row FROM notification WHERE reading='false'",function(respArr){
-		if(debug){
-			console.log('Badge:'+respArr.row);
-		}
+		Debug('Badge: '+respArr.row);
 		if(respArr.row>0){
 			localStorage.badge = respArr.item(0).row;
 		}else{
@@ -111,8 +105,10 @@ function checkBadge(){
 		});
 }
 function checkLogin(callback){
+	Debug("checkLogin");
 	chrome.cookies.get({url :wwwurl,name:'WCC_user'},function(cookie){
 		if(cookie==null){
+			Debug("is not Login");
 			isLogin = false;
 			if(callback!=undefined){
 				callback();
@@ -122,6 +118,7 @@ function checkLogin(callback){
 			$.get(checkLoginUrl,function(resp){
 				localStorage.user = resp.payload.result.data.username;
 				localStorage.email = resp.payload.result.data.username;
+				Debug("is Logined: User: "+localStorage.user+", Email: "+localStorage.email);
 			});
 		}
 		if(callback!=undefined){
@@ -131,15 +128,11 @@ function checkLogin(callback){
 }
 /* Register device*/
 var registerDevice = function(){
-	if(debug){
-		console.log("register device");
-	}
+	Debug("registerDevice");
 	chrome.pushMessaging.getChannelId(true,function(ch){
-		if(debug){
-			console.log(localStorage.user);
-		}
 		name = isLogin?localStorage.user:'guest';
 		email = isLogin?localStorage.email:'guest@janbin.com';
+		Debug("ChannelId: "+ch.channelId+", Name: "+name+", Email: "+email);
 		$.post(notificationUrl,{
 			"udid":ch.channelId,
 			"deviceToken":"not token",
@@ -153,13 +146,13 @@ var registerDevice = function(){
 }
 // Push Process
 function pushListener(){
-	if(debug){
-		console.log("pushMessaging Listener");
-	}
+	Debug("pushMessaging Listener");
 	chrome.pushMessaging.onMessage.addListener(pushReceive);
 }
 //Received push data
 function pushReceive(data){
+	Debug("pushReceive");
+	Debug(data);
 	_gaq.push(['_trackPageview','/extension/notification/comment']);
 	switch(data.subchannelId){
 		case 1:
@@ -222,26 +215,6 @@ function notificationAddImage(data){
 		}
 	);*/
 }
-
-function justTime(t){
-	var diffTime = new Date().getTime()-t;
-
-	if(diffTime<60000){
-		return Math.ceil(diffTime/60000)+" วินาทีที่แล้ว";
-	}else if(diffTime<3600000){
-		return Math.ceil(diffTime/3600000)+" นาทีที่แล้ว";
-	}else if(diffTime<86400000){
-		return Math.ceil(diffTime/86400000)+" ชั่วโมงที่แล้ว";
-	}else if(diffTime<172800000){
-		return "เมื่อวานนี้";
-	}else{
-		return thaiDate(t)
-	}
-}
-function thaiDate(t){
-	return new Date(t).toString().replace(/GMT.*/,'');
-}
-
 createDatabase();
 checkBadge();
 checkLogin(registerDevice);
