@@ -23,8 +23,20 @@ _gaq.push(['_trackPageview','/extension/popup.html']);
 })();
 
 function onDBError(tx,e){
-	console.log("Database Error: "+e.message);
+	Debug("Database Error: "+e.message);
 }
+function Query(sql,callback){
+	Debug('Query: '+sql);
+	db.transaction(function (tx) {
+		tx.executeSql(sql,[],function(tx,rs){
+			Debug(rs.row);
+			if(callback!=undefined){
+				callback(rs);
+			}
+		},onDBError);
+	});
+}
+
 function randerLogin(){
 	$('.login').show();
 	//$('.login .btn-submit').click(function(){
@@ -32,7 +44,7 @@ function randerLogin(){
 //	});
 	/*$('.login a').click(function(){
 		var thislink = $(this).attr('href');
-		chrome.tabs.query({url:authurl+'*'},function(respArr){	
+		chrome.tabs.Query({url:authurl+'*'},function(respArr){	
 			if(respArr.length){
 				chrome.tabs.update(respArr[0].id,{active:true,url:thislink});
 			}else{
@@ -41,20 +53,12 @@ function randerLogin(){
 		});
 	});*/s
 }
-function query(sql,callback){
-	db.transaction(function (tx) {
-		tx.executeSql(sql,[],function(tx,rs){
-			if(callback!=undefined){
-				callback(rs);
-			}
-		},onDBError);
-	});
-}
+
 function randerNotificationComment(item,newnode){
 	var who = JSON.parse(item.who);
 	var at = JSON.parse(item.at);
 	//console.log(at);
-	$($(newnode).find('a')[0]).attr('href',reviewUrl+item.url);
+	$($(newnode).find('a')[0]).attr('href',item.url);
 	$($(newnode).find('.thm-user')[0]).attr('src',avatarUrl+who.avatar);
 	$($(newnode).find('.u-name')[0]).html(who.username);
 	$($(newnode).find('.txt-red')[0]).html('ได้คอมเม้นต์รีวิวร้าน');
@@ -66,16 +70,14 @@ function randerNotificationComment(item,newnode){
 	$($(newnode).find('abbr')[0]).html(justTime(item.time*1000));
 	$($(newnode).find('abbr')[0]).attr('data-utime',item.time*1000);
 	$($(newnode).find('abbr')[0]).attr('title',item.time*1000);
-	if(item.reading=='false'){
+	if(item.reading=='true'){
 		$(newnode).addClass('reading');
 	}
 	return newnode;
 }
+
 function randerNotificationWelcome(item,newnode){
 	Debug('randerNotificationWelcome');
-	//var who = JSON.parse(item.who);
-	//var at = JSON.parse(item.at);
-	//console.log(at);
 	$($(newnode).find('a')[0]).attr('href',item.url);
 	$($(newnode).find('.thm-user')[0]).attr('src','/images/icon128.png');
 	$($(newnode).find('.u-name')[0]).html('Janbin Master');
@@ -88,10 +90,29 @@ function randerNotificationWelcome(item,newnode){
 	$($(newnode).find('abbr')[0]).html(justTime(item.time*1000));
 	$($(newnode).find('abbr')[0]).attr('data-utime',item.time*1000);
 	$($(newnode).find('abbr')[0]).attr('title',item.time*1000);
-	if(item.reading=='false'){
+	return newnode;
+}
+function randerNotificationNewReview(item,newnode){
+	Debug('randerNotificationNewReview');
+	var who = JSON.parse(item.who);
+	var at = JSON.parse(item.at);
+	$($(newnode).find('a')[0]).attr('href',item.url);
+	$($(newnode).find('.thm-user')[0]).attr('src',avatarUrl+who.avatar);
+	$($(newnode).find('.u-name')[0]).html(who.username);
+	$($(newnode).find('.txt-red')[0]).html('ได้เพิ่มรีวิวร้านใหม่');
+	
+	$($(newnode).find('strong')[0]).html(at.place);
+	$($(newnode).find('small')[0]).html(at.title);
+	$($(newnode).find('.thb-action img')[0]).attr('src',staticUrl+(at.image.replace('.jpg','_70x70.jpg')));
+	$($(newnode).find('figcaption')[0]).html(at.place);
+	$($(newnode).find('abbr')[0]).html(justTime(item.time*1000));
+	$($(newnode).find('abbr')[0]).attr('data-utime',item.time*1000);
+	$($(newnode).find('abbr')[0]).attr('title',item.time*1000);
+	if(item.reading=='true'){
 		$(newnode).addClass('reading');
 	}
 	return newnode;
+
 }
 function randerNotification(items){
 	if(debug){
@@ -104,6 +125,9 @@ function randerNotification(items){
 		var item = items.item(i);
 		var newnode = $(template).clone();
 		switch(item.action){
+			case 'newreview':
+				newnode = randerNotificationNewReview(item,newnode);
+				break;
 			case 'comment':
 				newnode = randerNotificationComment(item,newnode);
 				break;
@@ -122,10 +146,9 @@ function randerNotification(items){
 	$('.notification li a').click(function(){
 		chrome.tabs.create({url:$(this).attr('href')}	);
 	});
-
 }
 function getNotification(){
-	query("SELECT * FROM notification ORDER BY  reading ASC ,time DESC LIMIT 0,10 ",function(resp){
+	Query("SELECT * FROM notification WHERE action IN ('welcome','comment','newreview')  ORDER BY  reading ASC ,time DESC LIMIT 0,5 ",function(resp){
 		if(resp.rows.length>0){
 			$('.notification').hide();
 			randerNotification(resp.rows);
@@ -145,7 +168,7 @@ function getNotification(){
 			//window.close();
 		}
 	});
-	query("UPDATE notification SET reading = 'true'");
+	Query("UPDATE notification SET reading = 'true'");
 	chrome.browserAction.setBadgeText({
 		text: ''
 	});

@@ -1,7 +1,7 @@
 {
 	"manifest_version":2,
 	"name": "Janbin.com Notification",
-	"version": "1.1.9",
+	"version": "1.2.0",
 	"description": "Janbin.com แหล่งรวมร้านอาหาร รีวิวร้านอาหาร แนะนำร้านอาหาร อาหารอร่อย แนะนำร้านอาหารรบรรยากาศดี พร้อมข้อมูลและแผนที่ร้านอาหาร",
 	"background": {
 					"scripts":["js/jquery.tools.min_1.7.2.js","js/common.js","js/background.js"]
@@ -47,5 +47,5 @@
 		"*"
 	],
 	"content_security_policy":"script-src 'self' https://ssl.google-analytics.com; object-src 'self'"
-	,"key": "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDj7qmTPZyy1H8tpHpHQlaXs1hquYMSJ7MTknUNLPBvvr502YO+w/qEaJq7Yp/ZOZvnqWJW6YON/FzGjN/5VBl1dnagJxBQ5QaYFLkPC3dsTkMoD5mkLWLy//1uL4Q113wHmo44WsUPKMxgk80iSNkAMPXQG+ClykNcPhy5Lv1HLQIDAQAB"
+	//,"key": "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDj7qmTPZyy1H8tpHpHQlaXs1hquYMSJ7MTknUNLPBvvr502YO+w/qEaJq7Yp/ZOZvnqWJW6YON/FzGjN/5VBl1dnagJxBQ5QaYFLkPC3dsTkMoD5mkLWLy//1uL4Q113wHmo44WsUPKMxgk80iSNkAMPXQG+ClykNcPhy5Lv1HLQIDAQAB"
 }

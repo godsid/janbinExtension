@@ -8,14 +8,31 @@ var wwwurl = "http://www.janbin.com/";
 var authurl = "http://www.janbin.com/users/auth";
 var reviewUrl = "http://www.janbin.com/รีวิว/";
 var avatarUrl = 'http://www.janbin.com/farm/avatar_org';
-
+var notificationURL = 'http://www.janbin.com/api/notification/getOnceNotification/';
 var checkLoginUrl = 'http://www.janbin.com/ajax/users/is_login';
 var notificationUrl = 'https://secure.soi19.com/notification/register.php';
 var extensionUrl = "https://chrome.google.com/webstore/detail/janbincom-notification/enmhpobiebfcjldhccpgacdjcfonclhl";
 var db = openDatabase('notificationDB', '1.0', 'notification Database', 2 * 1024 * 1024);//2M
 var isLogin = false;
 
+function onDBError(tx,e){
+	Debug("Database Error: "+e.message);
+}
+function query(sql,callback){
+	Debug('Query: '+sql);
+	db.transaction(function (tx) {
+		tx.executeSql(sql,[],function(tx,rs){
+			Debug(rs.row);
+			if(callback!=undefined){
+				callback(rs);
+			}
+		},onDBError);
+	});
+}
+
 chrome.runtime.onInstalled.addListener(function(obj){
+	Debug("Installed");
+	createDatabase();
 	notification = window.webkitNotifications.createNotification('images/icon128.png', "Welcome Janbin Notification", '');
 	notification.url = wwwurl;
 	notification.onclick = function(e){
@@ -26,6 +43,8 @@ chrome.runtime.onInstalled.addListener(function(obj){
 });
 
 chrome.runtime.onUpdateAvailable.addListener(function(obj){
+	Debug("Updated");
+	createDatabase();
 	notification = window.webkitNotifications.createNotification('images/icon128.png', 'Janbin Notification new version('+obj.version+')', '');
 	notification.url = extensionUrl;
 	notification.onclick = function(e){
@@ -54,22 +73,10 @@ if (window.webkitNotifications){
   }
 }
 
-function onDBError(tx,e){
-	Debug("Database Error: "+e.message);
-}
-function query(sql,callback){
-	Debug('Query: '+sql);
-	db.transaction(function (tx) {
-		tx.executeSql(sql,[],function(tx,rs){
-			Debug(rs.row);
-			if(callback!=undefined){
-				callback(rs);
-			}
-		},onDBError);
-	});
-}
+
 /* Create Database if exits */
 function createDatabase(){
+	query("DROP TABLE notification");
 	Debug('Create Database Table notification');
 	if(localStorage.user==undefined){
 		localStorage.user = 'guest';
@@ -79,22 +86,25 @@ function createDatabase(){
 	}
 	query('CREATE TABLE IF NOT EXISTS notification (id integer primary key asc ,who string,action string,with string,at string, time integer, url string ,reading bool)');
 	//query('CREATE TABLE IF NOT EXISTS notification (id integer primary key asc, time integer, user_img string, user_name string string, review_id string, review_title string, review_desc string,review_ratting integer,review_img string, reading bool)');
+
 	query("INSERT INTO notification VALUES(1,'','welcome','','',"+Math.ceil(new Date().getTime()/1000)+",'"+wwwurl+"','false')");
-	
+	//query("INSERT INTO notification VALUES (2,'{\"username\":\"Cinnabon\",\"avatar\":\"/1/1/avt_19_53505.jpg\"}','comment','{\"username\":\"บรรพต สีหะวงษ์\",\"avatar\":\"/default.jpg?8\"}','{\"place\":\"@Caffe Sonata\",\"title\":\"คาเฟ่บรรยากาศเก๋ๆ ทานขนมหวานกับเพลงหวานๆ\",\"image\":\"/1/16/img_22922_OY1lg.jpg\"}',1375435680,'/3067-Caffe-Sonata','false')");
 
 	//(comment) INSERT INTO notification VALUES (null,'{"username":"Cinnabon","avatar":"/1/1/avt_19_53505.jpg"}','comment','{"username":"บรรพต สีหะวงษ์","avatar":"/default.jpg?8"}','{"place":"@Caffe Sonata","title":"คาเฟ่บรรยากาศเก๋ๆ ทานขนมหวานกับเพลงหวานๆ","image":"/1/16/img_22922_OY1lg.jpg"}',1375435680,'/3067-Caffe-Sonata','false');	
 	//addreview INSERT INTO notification VALUES (null,'{username:"Cinnabon",avatar:"/1/1/avt_19_53505.jpg"}','addreview','{place:"@Caffe Sonata",title:"คาเฟ่บรรยากาศเก๋ๆ ทานขนมหวานกับเพลงหวานๆ",image:"/1/16/img_22922_OY1lg.jpg"}','',1375435680,'/3067-Caffe-Sonata','false');
 	//like INSERT INTO notification VALUES (null,'{username:"Cinnabon",avatar:"/1/1/avt_19_53505.jpg"}','like','{place:"@Caffe Sonata",title:"คาเฟ่บรรยากาศเก๋ๆ ทานขนมหวานกับเพลงหวานๆ",image:"/1/16/img_22922_OY1lg.jpg"}','{username:"บรรพต สีหะวงษ์",avatar:"/default.jpg?8"}',1375435680,'/3067-Caffe-Sonata','false');
 	//vote 
 	//addimage
+	checkBadge();
 }
 /* Check notification isn't read */
 function checkBadge(){
-		Debug("checkBadge");
-		query("SELECT COUNT(*) AS row FROM notification WHERE reading='false'",function(respArr){
-		Debug('Badge: '+respArr.row);
-		if(respArr.row>0){
-			localStorage.badge = respArr.item(0).row;
+	Debug("checkBadge");
+	query("SELECT COUNT(*) AS row FROM notification WHERE reading='false'  ",function(respArr){
+		item = respArr.rows.item(0).row;
+		Debug('Badge: '+item);
+		if(item>0){
+			localStorage.badge = item;
 		}else{
 			localStorage.badge = 0;
 		}
@@ -154,24 +164,38 @@ function pushReceive(data){
 	Debug("pushReceive");
 	Debug(data);
 	_gaq.push(['_trackPageview','/extension/notification/comment']);
-	switch(data.subchannelId){
-		case 1:
-			notificationNewReview(data.payload);
-			break;
-		case 2:
-			notificationComment(data.payload);
-			break;
-		case 3:
-			notificationAddPoint(data.payload);
-			break;
-		case 4:
-			notificationAddImage(data.payload);
-			break;
-		case 0:
-		default:
-			notificationMessage(data.payload);
-			break;
-	}
+	var push= data.payload.split('|');
+	Debug(push);
+	data = data.payload.replace(/\|/g,'/');
+	Debug(data);
+	//2/comment/8/15?format=json
+	$.get(notificationURL+data,{'format':'json','r':new Date().getTime()},function(resp){
+		resp = resp.results.result.data;
+		resp.action = push[1];
+		resp.time = push[4];
+		Debug(resp);
+		query("INSERT INTO notification VALUES(null,'{\"username\":\""+resp.who.nickname+"\",\"avatar\":\""+resp.who.avatar+"\"}','"+resp.action+"','{\"username\":\""+resp.with.nickname+"\",\"avatar\":\""+resp.with.avatar+"\"}','{\"place\":\""+resp.at.place_name+"\",\"title\":\""+resp.at.description+"\",\"image\":\""+resp.at.image+"\"}',"+resp.time+",'"+resp.url+"','false') ");
+		switch(resp.action){
+			case 'newreview':
+				notificationNewReview(resp);
+				break;
+			case 'comment':
+				notificationComment(resp);
+				break;
+			case 3:
+				notificationAddPoint(resp);
+				break;
+			case 4:
+				notificationAddImage(resp);
+				break;
+			case 0:
+			default:
+				notificationMessage(resp);
+				break;
+		}
+		
+	});
+	
 }
 // Display Notification message
 function notificationMessage(data){
@@ -186,15 +210,24 @@ function notificationMessage(data){
 }
 //Display Notification new review
 function notificationNewReview(data){
+	Debug(data);
+	title = data.who.nickname+" ได้เพิ่มรีวิวร้านใหม่";
+	message = data.at.place_name+"\n \""+data.at.description+"\"\n "+justTime(Math.ceil(new Date().getTime()/1000));
+	notification = window.webkitNotifications.createNotification(avatarUrl+data.who.avatar, title, message);
+	notification.url = data.url;//wwwurl+'รีวิว/'+data.at.place_id+'#place-rw';
+	notification.onclick = function(e){
+		_gaq.push(['_trackEvent','comment','clicked']);
+		chrome.tabs.create({url:e.target.url});
+	};
+	notification.show();
 }
 // Display Notification Comment
 function notificationComment(data){ 
-	data = data.split('|');
-	console.log(data);
-	title = data[1]+" คอมเม้นต์รีวิวของคุณ";
-	message = data[2]+"\n "+justTime(data[3]);
-	notification = window.webkitNotifications.createNotification(avatarUrl+data[0], title, message);
-	notification.url = wwwurl+'รีวิว/'+data[4]+'#place-rw';
+	Debug(data);
+	title = data.who.nickname+" คอมเม้นต์รีวิวของคุณ";
+	message = data.at.place_name+"\n \""+data.at.description+"\"\n "+justTime(Math.ceil(new Date().getTime()/1000));
+	notification = window.webkitNotifications.createNotification(avatarUrl+data.who.avatar, title, message);
+	notification.url = data.url;//wwwurl+'รีวิว/'+data.at.place_id+'#place-rw';
 	notification.onclick = function(e){
 		_gaq.push(['_trackEvent','comment','clicked']);
 		chrome.tabs.create({url:e.target.url});
@@ -215,10 +248,12 @@ function notificationAddImage(data){
 		}
 	);*/
 }
-createDatabase();
+
+
 checkBadge();
 checkLogin(registerDevice);
 pushListener();
+
 /*
 chrome.topSites.get(function(r){
 });

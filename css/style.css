@@ -22,15 +22,15 @@ a:hover{text-decoration:underline}
 .ctrl-submit a{display:inline-block;margin:0 20px;font:700 14px/30px tahoma,"Thonburi";color:#555}
 .ctrl-submit a.btn-submit{min-width:100px}
 .notification{}
-.notification .lists{lists-style:none;padding:5px 75px 5px 10px;position:relative;border-bottom:solid 2px #e6e6e6;min-height:65px;cursor:pointer}
-.notification .lists:after{ content:".";display:block;clear:both;height:0;visibility:hidden}
+.notification .lists{list-style:none;padding:5px 75px 5px 10px;position:relative;border-bottom:solid 2px #e6e6e6;min-height:65px;cursor:pointer}
+.notification .lists:after{ /*content:".";*/display:block;clear:both;height:0;visibility:hidden}
 .notification .lists  a{ color:#555;font:13px/18px tahoma}
 .notification .lists  a:hover{ text-decoration:none}
 .notification .lists.reading{background-color:#E5D3E5}
 .notification .lists.over,.notification .lists:hover{background-color:#CCC}
 .thm-user{ display:block;margin:0 10px 0 0;border-radius:3em;float:left}
 a:hover .thm-user{ opacity: 1;filter: none;box-shadow: 0 0 0 1px #970127, 0 0 0 6px #e62379, -3px 3px 3px 8px rgba(0,0,0,0.5)}
-.thm-uname em{display: block;font: 11px/16px tahoma;lists-style-type:none;position: absolute;left: 0px;width: 80px;top: 95px;text-align: center}
+.thm-uname em{display: block;font: 11px/16px tahoma;list-style-type:none;position: absolute;left: 0px;width: 80px;top: 95px;text-align: center}
 .ContentInfo{ display:block;float:left;width:221px;overflow:hidden}
 .ContentInfo .Action{}
 .ContentInfo .Action .u-name{ font-weight:700;font-style:normal;color:#F36}
