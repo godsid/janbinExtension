@@ -1,7 +1,7 @@
 {
 	"manifest_version":2,
 	"name": "Janbin.com Notification",
-	"version": "1.2.0",
+	"version": "1.2.1",
 	"description": "Janbin.com แหล่งรวมร้านอาหาร รีวิวร้านอาหาร แนะนำร้านอาหาร อาหารอร่อย แนะนำร้านอาหารรบรรยากาศดี พร้อมข้อมูลและแผนที่ร้านอาหาร",
 	"background": {
 					"scripts":["js/jquery.tools.min_1.7.2.js","js/common.js","js/background.js"]
