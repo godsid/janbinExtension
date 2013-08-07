@@ -39,19 +39,19 @@ function Query(sql,callback){
 
 function randerLogin(){
 	$('.login').show();
-	//$('.login .btn-submit').click(function(){
-	//	chrome.tabs.create({url:'http://www.janbin.com/users/auth/login'});
-//	});
-	/*$('.login a').click(function(){
+	$('.login .btn-submit').click(function(){
+		chrome.tabs.create({url:'http://www.janbin.com/users/auth/login'});
+	});
+	$('.login a').click(function(){
 		var thislink = $(this).attr('href');
-		chrome.tabs.Query({url:authurl+'*'},function(respArr){	
+		chrome.tabs.query({url:authurl+'*'},function(respArr){	
 			if(respArr.length){
 				chrome.tabs.update(respArr[0].id,{active:true,url:thislink});
 			}else{
 				chrome.tabs.create({url:thislink});
 			}
 		});
-	});*/s
+	});
 }
 
 function randerNotificationComment(item,newnode){

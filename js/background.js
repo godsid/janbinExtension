@@ -78,12 +78,12 @@ if (window.webkitNotifications){
 function createDatabase(){
 	query("DROP TABLE notification");
 	Debug('Create Database Table notification');
-	if(localStorage.user==undefined){
+	/*if(localStorage.user==undefined){
 		localStorage.user = 'guest';
-	}
-	if(localStorage.email==undefined){
+	}*/
+	/*if(localStorage.email==undefined){
 		localStorage.email = 'guest@janbin.com';
-	}
+	}*/
 	query('CREATE TABLE IF NOT EXISTS notification (id integer primary key asc ,who string,action string,with string,at string, time integer, url string ,reading bool)');
 	//query('CREATE TABLE IF NOT EXISTS notification (id integer primary key asc, time integer, user_img string, user_name string string, review_id string, review_title string, review_desc string,review_ratting integer,review_img string, reading bool)');
 
@@ -138,10 +138,12 @@ function checkLogin(callback){
 }
 /* Register device*/
 var registerDevice = function(){
+	
 	Debug("registerDevice");
 	chrome.pushMessaging.getChannelId(true,function(ch){
-		name = isLogin?localStorage.user:'guest';
-		email = isLogin?localStorage.email:'guest@janbin.com';
+		
+		var name = localStorage.user=='undefined'?'guest':localStorage.user;
+		var email = localStorage.email=='undefined'?'guest@janbin.com':localStorage.email;
 		Debug("ChannelId: "+ch.channelId+", Name: "+name+", Email: "+email);
 		$.post(notificationUrl,{
 			"udid":ch.channelId,
@@ -248,8 +250,13 @@ function notificationAddImage(data){
 		}
 	);*/
 }
-
-
+function createcontextMenu(){
+	chrome.contextMenus.create({type:'normal',title:'janbin.com',contexts:['all'],onclick:function(info,tab){
+			chrome.tabs.create({url:'http://www.janbin.com'});
+			//,documentUrlPatterns:['http://*.janbin.com/*']
+	}});
+}
+createcontextMenu();
 checkBadge();
 checkLogin(registerDevice);
 pushListener();
